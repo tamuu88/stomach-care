@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>便通ルーティン</title>
+<style>
+:root{--bg:#fbfaf8;--card:#fff;--ink:#393735;--muted:#8b8782;--line:#e9e4de;--accent:#b98d82;--accent2:#eadbd5;}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}main{max-width:520px;margin:auto;padding:24px 18px 36px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.title{font-size:25px;font-weight:700}.date{color:var(--muted);font-size:14px;margin-top:4px}.progress{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}.progress-row{display:flex;justify-content:space-between;align-items:end}.count{font-size:28px;font-weight:700}.bar{height:8px;background:#eee9e4;border-radius:99px;overflow:hidden;margin-top:12px}.fill{height:100%;width:0;background:var(--accent);transition:.2s}.habit{width:100%;border:1px solid var(--line);background:var(--card);border-radius:18px;padding:17px;margin:10px 0;display:flex;align-items:center;gap:14px;text-align:left;color:var(--ink);font:inherit}.habit.done{background:#faf4f1;border-color:var(--accent2)}.check{width:32px;height:32px;border-radius:50%;border:2px solid #d8d1ca;display:grid;place-items:center;flex:none;color:transparent;font-weight:800}.done .check{background:var(--accent);border-color:var(--accent);color:white}.label{font-size:16px;font-weight:650}.hint{font-size:12px;color:var(--muted);margin-top:3px}.nav{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px}.nav button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 13px;color:var(--ink)}.nav strong{font-size:15px}.history{border-top:1px solid var(--line);padding-top:18px;margin-top:18px}.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.day{text-align:center;font-size:11px;color:var(--muted)}.dot{width:32px;height:32px;margin:5px auto 0;border-radius:50%;background:#eee9e4;display:grid;place-items:center;font-size:11px;color:#777}.dot.full{background:var(--accent);color:white}.dot.partial{background:var(--accent2);color:#765d55}.note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:16px}.reset{border:0;background:none;color:var(--muted);font-size:12px;text-decoration:underline;padding:8px}
+</style></head>
+<body><main>
+<div class="top"><div><div class="title">便通ルーティン</div><div class="date" id="dateText"></div></div><button class="reset" onclick="resetDay()">今日をリセット</button></div>
+<section class="progress"><div class="progress-row"><span>今日の記録</span><span class="count" id="count">0 / 3</span></div><div class="bar"><div class="fill" id="fill"></div></div></section>
+<div id="habits"></div>
+<div class="nav"><button onclick="move(-1)">‹ 前の日</button><strong id="selected"></strong><button onclick="move(1)">次の日 ›</button></div>
+<section class="history"><div style="margin-bottom:10px;font-weight:650">直近7日</div><div class="days" id="days"></div></section>
+<div class="note">記録はこのブラウザ内に保存します。外部には送信しません。まずは「できた／できなかった」を気軽に残すためのシンプル版です。</div>
+</main>
+<script>
+const habits=["朝一杯のお水","朝食後にトイレ","夜のマッサージ"];
+let selected=new Date(); selected.setHours(0,0,0,0);
+const key=d=>"benpi-"+d.toISOString().slice(0,10); const jp=d=>d.toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'});
+function get(d){try{return JSON.parse(localStorage.getItem(key(d))||"[false,false,false]")}catch(e){return [false,false,false]}}
+function save(a){localStorage.setItem(key(selected),JSON.stringify(a));}
+function render(){document.getElementById('dateText').textContent=selected.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});document.getElementById('selected').textContent=jp(selected);let a=get(selected),n=a.filter(Boolean).length;document.getElementById('count').textContent=n+" / 3";document.getElementById('fill').style.width=(n/3*100)+"%";document.getElementById('habits').innerHTML=habits.map((h,i)=>`<button class="habit ${a[i]?'done':''}" onclick="toggle(${i})"><span class="check">✓</span><span><div class="label">${h}</div><div class="hint">タップして記録</div></span></button>`).join('');renderHistory()}
+function toggle(i){let a=get(selected);a[i]=!a[i];save(a);render()}
+function resetDay(){if(confirm('今日の記録をすべて外しますか？')){localStorage.removeItem(key(selected));render()}}
+function move(n){selected.setDate(selected.getDate()+n);render()}
+function renderHistory(){let out="",d=new Date(selected);d.setDate(d.getDate()-6);for(let i=0;i<7;i++){let a=get(d),n=a.filter(Boolean).length;out+=`<div class="day">${d.toLocaleDateString('ja-JP',{weekday:'short'}).replace('曜日','')}</div><div></div>`;d.setDate(d.getDate()+1)}
+// rebuild as paired cells
+let html="",base=new Date(selected);base.setDate(base.getDate()-6);for(let i=0;i<7;i++){let a=get(base),n=a.filter(Boolean).length;html+=`<div class="day">${base.toLocaleDateString('ja-JP',{weekday:'short'}).slice(0,1)}<div class="dot ${n===3?'full':n>0?'partial':''}">${n}/3</div></div>`;base.setDate(base.getDate()+1)}document.getElementById('days').innerHTML=html}
+render();
+</script></body></html>
