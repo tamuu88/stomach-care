@@ -1,1 +1,15 @@
-
+{
+  "name": "お腹ケア",
+  "short_name": "お腹ケア",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#F8A055",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
